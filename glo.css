@@ -1,0 +1,20 @@
+
+table {
+    color:black;
+}
+
+th {
+    text-align: left;
+}
+
+td.value {
+    text-align: right;
+}
+
+tr:nth-child(even) {
+    background: #CCC
+}
+
+tr:nth-child(odd) {
+    background: #FFF
+}
