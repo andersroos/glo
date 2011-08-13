@@ -66,27 +66,31 @@ var Process = function(host, port, url) {
         return v;
     }
 
+    function pid() {
+        return id(hostport);
+    }
+
     function setGoodState() {
         if (failed) {
             $("." + id(hostport)).css('color', '');
             failed = 0;
         }
     }
-    
+
     function setFailedState() {
         if (!failed) {
             $("tr." + id(hostport)).css('color', 'darkred');
             failed = 1;
         }
     }
-
+    
     function applyData(json) {
-        var lastid = id(hostport);
+        var lastid = pid();
         $.each(json.data, function(i, statusvalue) {
             var v = transformVersion(json.version, statusvalue);
             var row = $("#" + id(v.key));
             if (row.length == 0) {
-                row = $("<tr id='" + id(v.key) + "' class='lvl" + v.lvl + "  " + id(hostport) + "'><td>" + v.key + "</td>" +
+                row = $("<tr id='" + id(v.key) + "' class='lvl" + v.lvl + "  " + pid() + "'><td>" + v.key + "</td>" +
                         "<td class=value></td><td></td><td class=desc>" + v.desc + "</td></tr>");
                 row.insertAfter("#" + lastid);
                 row.data(Value(v.key));
@@ -95,32 +99,47 @@ var Process = function(host, port, url) {
             lastid = id(v.key);
         });
     }
+
+    function update() {
+        if (failed && ++failed % 30 == 0) return;
+        $.ajax({
+            type: "GET", 
+            dataType: "json",
+            url: url,
+            success: function(json) {
+                setGoodState();
+                applyData(json);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                setFailedState();
+            },
+            timeout: 500});
+    }
     
     return {
+        // Get the (html) id for this process.
+        pid: function() {
+            pid();
+        },
+        
         // Set the state of this process to good.
-        setGoodState: setGoodState,
+        setGoodState: function() {
+            setGoodState();
+        },
 
         // Set the state of this process to failed.
-        setFailedState: setFailedState,
+        setFailedState: function() {
+            setFailedState();
+        },
 
         // Apply new json data to this process.
-        applyData: applyData,
+        applyData: function(json) {
+            applyData(json);
+        },
         
         // Get latest data from server and update display.
         update: function() {
-            if (failed && ++failed % 30 == 0) return;
-            $.ajax({
-                type: "GET", 
-                dataType: "json",
-                url: url,
-                success: function(json) {
-                    setGoodState();
-                    applyData(json);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    setFailedState();
-                },
-                timeout: 500});
+            update();
         }
     }
 };
