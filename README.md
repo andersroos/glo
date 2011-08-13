@@ -18,15 +18,15 @@ Status Data Format
 The status data is communicated through JSON, either plain JSON or
 wrapped in a Javascript callback.
 
-{
-    version: <number, the current version>,
-    timestamp: <number, server time since EPOC in milliseconds>,
-    data: [ { key: "<string, name + : + tag>",
-              value: "<string, the value as a string>",
-              desc: "<string, a human readable description>",
-              lvl: "<number, level of importance where 0 is the highest> },
-            ... ]
-}
+    {
+        version: &lt;number, the current version&gt;,
+        timestamp: &lt;number, server time since EPOC in milliseconds&gt;,
+        data: [ { key: "&lt;string, name + : + tag&gt;",
+                  value: "&lt;string, the value as a string&gt;",
+                  desc: "&lt;string, a human readable description&gt;",
+                  lvl: "&lt;number, level of importance where 0 is the highest&gt; },
+                ... ]
+    }
           
             
 
