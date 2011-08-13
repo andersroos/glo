@@ -37,4 +37,4 @@ The source can be found at [GitHub].
 
 [MIT License]: http://github.com/andersroos/LICENSE.txt
 [GitHub]: http://github.com/andersroos/glo
-[IANA port assignments] http://www.iana.org/assignments/port-numbers
+[IANA port assignments]: http://www.iana.org/assignments/port-numbers
