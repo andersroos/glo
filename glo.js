@@ -19,7 +19,7 @@ var Value = function(key) {
 var Process = function(host, port, url) {
 
     var hostport = host + ":" + port;
-    var failed = false;
+    var failed = 0;
     var data = {};
     
     $("#data").append("<tr id='" + id(hostport) + "'><th colspan='4'>" + hostport + "</th></tr>");
@@ -38,41 +38,50 @@ var Process = function(host, port, url) {
         }
         return v;
     }
+
+    function setGoodState() {
+        if (failed) {
+            $("." + id(hostport)).css('color', '');
+            failed = 0;
+        }
+    }
+    
+    function setFailedState() {
+        if (!failed) {
+            $("tr." + id(hostport)).css('color', 'darkred');
+            failed = 1;
+        }
+    }
     
     return {
         // Get latest data from server and update display.
         update: function() {
-            if (!failed) {
-                $.ajax({
-                    type: "GET", 
-                    dataType: "json",
-                    url: url,
-                    success: function(json) {
-                        var lastid = id(hostport);
-                        $.each(json.data, function(i, statusvalue) {
-                            var v = transformVersion(json.version, statusvalue);
-                            var row = $("#" + id(v.key));
-                            if (row.length == 0) {
-                                row = $("<tr id='" + id(v.key) + "' class='lvl" + v.lvl + "  " + id(hostport) + "'><td>" + v.key + "</td>" +
-                                        "<td class=value></td><td></td><td class=desc>" + v.desc + "</td></tr>");
-                                row.insertAfter("#" + lastid);
-                                row.data(Value(v.key));
-                            }
-                            row.data().update(v.value, json.timestamp);
-                            lastid = id(v.key);
-                        });
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        $("tr." + id(hostport)).css('color', 'darkred');
-                        failed = true;
-                    },
-                    timeout: 500});
+            if (failed && ++failed % 30 == 0) return;
+            $.ajax({
+                type: "GET", 
+                dataType: "json",
+                url: url,
+                success: function(json) {
+                    setGoodState();
+                    var lastid = id(hostport);
+                    $.each(json.data, function(i, statusvalue) {
+                        var v = transformVersion(json.version, statusvalue);
+                        var row = $("#" + id(v.key));
+                        if (row.length == 0) {
+                            row = $("<tr id='" + id(v.key) + "' class='lvl" + v.lvl + "  " + id(hostport) + "'><td>" + v.key + "</td>" +
+                                    "<td class=value></td><td></td><td class=desc>" + v.desc + "</td></tr>");
+                            row.insertAfter("#" + lastid);
+                            row.data(Value(v.key));
+                        }
+                        row.data().update(v.value, json.timestamp);
+                        lastid = id(v.key);
+                    });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    setFailedState();
+                },
+                timeout: 500});
             }
-        },
-        // Reset the fail flag to make it try an update again.
-        retry: function() {
-            $("." + id(hostport)).css('color', '');
-            failed = false;
         }
     };
 };
