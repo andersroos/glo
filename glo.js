@@ -16,6 +16,33 @@ var Value = function(key) {
     };
 }
 
+var TestProcess = function(host, port, url) {
+    var json = {
+        version: 1,
+        timestamp: new Date().getTime(),
+        data: [
+            {key: "/localhost/gloserver/request:count",
+             value: "0",
+             desc: "The number of requests to the process server.",
+             lvl: 0}
+        ]
+    };
+    
+    var failed = false;
+    var process = Process(host, port, url);
+    process.update = function() {
+        if (failed) {
+            process.setFailedState();
+            return;
+        }
+        process.setGoodState();
+        json.timestamp = new Date().getTime();
+        json.data[0].value = (1 + parseInt(json.data[0].value)) + '';
+        process.applyData(json);
+    }
+    return process;
+}
+
 var Process = function(host, port, url) {
 
     var hostport = host + ":" + port;
@@ -52,8 +79,33 @@ var Process = function(host, port, url) {
             failed = 1;
         }
     }
+
+    function applyData(json) {
+        var lastid = id(hostport);
+        $.each(json.data, function(i, statusvalue) {
+            var v = transformVersion(json.version, statusvalue);
+            var row = $("#" + id(v.key));
+            if (row.length == 0) {
+                row = $("<tr id='" + id(v.key) + "' class='lvl" + v.lvl + "  " + id(hostport) + "'><td>" + v.key + "</td>" +
+                        "<td class=value></td><td></td><td class=desc>" + v.desc + "</td></tr>");
+                row.insertAfter("#" + lastid);
+                row.data(Value(v.key));
+            }
+            row.data().update(v.value, json.timestamp);
+            lastid = id(v.key);
+        });
+    }
     
     return {
+        // Set the state of this process to good.
+        setGoodState: setGoodState,
+
+        // Set the state of this process to failed.
+        setFailedState: setFailedState,
+
+        // Apply new json data to this process.
+        applyData: applyData,
+        
         // Get latest data from server and update display.
         update: function() {
             if (failed && ++failed % 30 == 0) return;
@@ -63,27 +115,14 @@ var Process = function(host, port, url) {
                 url: url,
                 success: function(json) {
                     setGoodState();
-                    var lastid = id(hostport);
-                    $.each(json.data, function(i, statusvalue) {
-                        var v = transformVersion(json.version, statusvalue);
-                        var row = $("#" + id(v.key));
-                        if (row.length == 0) {
-                            row = $("<tr id='" + id(v.key) + "' class='lvl" + v.lvl + "  " + id(hostport) + "'><td>" + v.key + "</td>" +
-                                    "<td class=value></td><td></td><td class=desc>" + v.desc + "</td></tr>");
-                            row.insertAfter("#" + lastid);
-                            row.data(Value(v.key));
-                        }
-                        row.data().update(v.value, json.timestamp);
-                        lastid = id(v.key);
-                    });
+                    applyData(json);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     setFailedState();
                 },
                 timeout: 500});
-            }
         }
-    };
+    }
 };
 
 var Status = function() {
@@ -93,6 +132,12 @@ var Status = function() {
     
     // Discover processes at host and add dynamically whenever found.
     function discover(host, port) {
+        if (host == 'test') {
+            hosts[host] = hosts[host] || {};
+            hosts[host][port] = hosts[host][port] || TestProcess(host, port, url);
+            hosts[host][port].update();
+            return;
+        }
         port = port || 22200;
         var host;
         var url = "http://" + host + ":" + port + "/?callback=?";
@@ -103,7 +148,7 @@ var Status = function() {
             success: function(json) {
                 hosts[host] = hosts[host] || {};
                 hosts[host][port] = hosts[host][port] || Process(host, port, url);
-                hosts[host][port].retry();
+                hosts[host][port].update();
             },
             error: function(jqXHR, textStatus, errorThrown) {
             },
