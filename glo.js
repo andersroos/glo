@@ -1,12 +1,12 @@
 
 // Takes a name and turns it into something usable as a html id.
-function id(key) {
+function idfy(key) {
     return key.replace(/[:/]/g, '-');
 }
 
-var Value = function(key) {
+var Value = function(id) {
 
-    var tdvalue = $("#" + id(key) + " .value");
+    var tdvalue = $("#" + id + " .value");
     
     return {
         // Update the value with the newest data.
@@ -49,7 +49,7 @@ var Process = function(host, port, url) {
     var failed = 0;
     var data = {};
     
-    $("#data").append("<tr id='" + id(hostport) + "'><th colspan='4'>" + hostport + "</th></tr>");
+    $("#data").append("<tr id='" + pid() + "'><th colspan='4'>" + hostport + "</th></tr>");
 
     function transformVersion(version, statusvalue) {
         var v = {};
@@ -67,7 +67,7 @@ var Process = function(host, port, url) {
     }
 
     function pid() {
-        return id(hostport);
+        return idfy(hostport);
     }
 
     function setGoodState() {
@@ -88,15 +88,16 @@ var Process = function(host, port, url) {
         var lastid = pid();
         $.each(json.data, function(i, statusvalue) {
             var v = transformVersion(json.version, statusvalue);
-            var row = $("#" + id(v.key));
+            var id = pid() + "-" + idfy(v.key);
+            var row = $("#" + id);
             if (row.length == 0) {
-                row = $("<tr id='" + id(v.key) + "' class='lvl" + v.lvl + "  " + pid() + "'><td>" + v.key + "</td>" +
+                row = $("<tr id='" + id + "' class='lvl" + v.lvl + "  " + pid() + "'><td>" + v.key + "</td>" +
                         "<td class=value></td><td></td><td class=desc>" + v.desc + "</td></tr>");
                 row.insertAfter("#" + lastid);
-                row.data(Value(v.key));
+                row.data(Value(id));
             }
             row.data().update(v.value, json.timestamp);
-            lastid = id(v.key);
+            lastid = id;
         });
     }
 
