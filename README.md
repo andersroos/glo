@@ -19,17 +19,32 @@ The status data is communicated through JSON, either plain JSON or
 wrapped in a Javascript callback.
 
     {
-        version: &lt;number, the current version&gt;,
-        timestamp: &lt;number, server time since EPOC in milliseconds&gt;,
-        data: [ { key: "&lt;string, name + : + tag&gt;",
-                  value: "&lt;string, the value as a string&gt;",
-                  desc: "&lt;string, a human readable description&gt;",
-                  lvl: "&lt;number, level of importance where 0 is the highest&gt; },
-                ... ]
+        "version": <number, the current version>,
+        "timestamp": <number, server time since EPOC in milliseconds>,
+        "data": [ { "key": "<string, name + : + tag>",
+                    "value": "<string, the value as a string>",
+                    "desc": "<string, a human readable description>",
+                    "lvl": "<number, level of importance where 0 is the highest> },
+                  ... ]
     }
-          
-            
 
+Example:
+
+    {
+        "version": 1,
+        "timestamp": 1313152128209,
+        "data": [
+            { "key": "\/server\/request:count",
+              "value": "45023",
+              "desc": "Number of successful requests to server.",
+              "lvl": 1 },
+            { "key": "\/server\/request:last-duration-us",
+              "value": "12323090239",
+              "desc": "The duration of the last request in microseconds.",
+              "lvl": 2 }
+        ]
+    }
+        
 Source
 ------
 
