@@ -72,14 +72,14 @@ var Process = function(host, port, url) {
 
     function setGoodState() {
         if (failed) {
-            $("." + id(hostport)).css('color', '');
+            $("." + id(hostport)).removeClass('failed');
             failed = 0;
         }
     }
 
     function setFailedState() {
         if (!failed) {
-            $("tr." + id(hostport)).css('color', 'darkred');
+            $("tr." + id(hostport)).addClass('failed');
             failed = 1;
         }
     }

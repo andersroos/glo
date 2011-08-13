@@ -1,14 +1,18 @@
 
-table {
-    color:black;
+body {
+    color: black;
 }
 
 th {
     text-align: left;
 }
 
-td.value {
+.value {
     text-align: right;
+}
+
+.failed {
+    color: dark-red;
 }
 
 tr:nth-child(even) {
