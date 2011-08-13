@@ -102,7 +102,7 @@ var Status = function() {
     };
     
     return {
-        // Rediscover new processes based on location bar.
+        // Rediscover new processes based on document URL (address in location bar).
         rediscover: function() {
             var url = document.URL;
             var index = url.indexOf('?');
