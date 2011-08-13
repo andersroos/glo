@@ -17,6 +17,7 @@ var Value = function(id) {
 }
 
 var TestProcess = function(host, port, url) {
+    
     var json = {
         version: 1,
         timestamp: new Date().getTime(),
@@ -29,16 +30,25 @@ var TestProcess = function(host, port, url) {
     };
     
     var failed = false;
+    
     var process = Process(host, port, url);
+    
+    var button = $("<button>good</button>")
+    button.click(function() {
+        failed = !failed;
+        if (failed) button.text("failed")
+        else button.text("good");
+    });
+    button.appendTo("#test-processes");
+    
     process.update = function() {
         if (failed) {
-            process.setFailedState();
+            process.updated(undefined);
             return;
         }
-        process.setGoodState();
         json.timestamp = new Date().getTime();
         json.data[0].value = (1 + parseInt(json.data[0].value)) + '';
-        process.applyData(json);
+        process.updated(json);
     }
     return process;
 }
@@ -72,19 +82,25 @@ var Process = function(host, port, url) {
 
     function setGoodState() {
         if (failed) {
-            $("." + id(hostport)).removeClass('failed');
+            $("." + pid()).removeClass('failed');
             failed = 0;
         }
     }
 
     function setFailedState() {
         if (!failed) {
-            $("tr." + id(hostport)).addClass('failed');
+            $("tr." + pid()).addClass('failed');
             failed = 1;
         }
     }
     
-    function applyData(json) {
+    function updated(json) {
+        if (json == undefined) {
+            setFailedState();
+            return;
+        }
+
+        setGoodState();
         var lastid = pid();
         $.each(json.data, function(i, statusvalue) {
             var v = transformVersion(json.version, statusvalue);
@@ -109,10 +125,11 @@ var Process = function(host, port, url) {
             url: url,
             success: function(json) {
                 setGoodState();
-                applyData(json);
+                updated(json);
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 setFailedState();
+                updated(undefined);
             },
             timeout: 500});
     }
@@ -123,19 +140,11 @@ var Process = function(host, port, url) {
             pid();
         },
         
-        // Set the state of this process to good.
-        setGoodState: function() {
-            setGoodState();
-        },
-
-        // Set the state of this process to failed.
-        setFailedState: function() {
-            setFailedState();
-        },
-
-        // Apply new json data to this process.
-        applyData: function(json) {
-            applyData(json);
+        // Apply new json data to this process. Calling with undefined
+        // means that we failed to get updated data. This will trigger
+        // a failed state.
+        updated: function(json) {
+            updated(json);
         },
         
         // Get latest data from server and update display.
