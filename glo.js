@@ -4,15 +4,10 @@ function idfy(key) {
     return key.replace(/[:/]/g, '-');
 }
 
-var Value = function(id) {
-
-    var tdvalue = $("#" + id + " .value");
-    
+var Value = function()
+{
     return {
-        // Update the value with the newest data.
-        update: function(newvalue, timestamp) {
-            tdvalue.text(newvalue);
-        }
+        filler: "filler"
     };
 }
 
@@ -53,29 +48,72 @@ var TestProcess = function(host, port, url) {
     return process;
 }
 
-var Process = function(host, port, url) {
+var ValueUI = function(processId, key, description, level)
+{
+    var id = processId + "-" + idfy(key);
 
+    var html = $("<tr id='" + id + "' class='lvl" + level + "  " + processId + "'><td>" + key + "</td>" +
+                 "<td class=value></td><td class=computed></td><td>" + description + "</td></tr>");
+    
+    return {
+        value: function(value) {
+            $("#" + id + " > .value").text(value);
+            //console.info("set value " + value);
+        },
+        computed: function(computed) {
+            $("#" + id + " > .computed").text(value);
+        },
+        html: function() {
+            return html;
+        }
+    }
+}
+
+var ProcessUI = function(host, port)
+{
+    var id = idfy(host + "-" + port);
+    
+    var rows = {};
+
+    var html = $("<tr id='" + id + "'><th colspan='4'>" + host + ":" + port + "</th></tr>");
+    
+    html.appendTo("#data");
+    
+//    var levelSelect = $("<input type=radio value=0 name='level-select-" + pid() + "'>" +
+//                        "<input type=radio value=1 name='level-select-" + pid() + "'>" +
+//                        "<input type=radio value=2 name='level-select-" + pid() + "' checked>" +
+//                        "<input type=radio value=3 name='level-select-" + pid() + "'>" +
+//                        "<input type=radio value=4 name='level-select-" + pid() + "'>");
+//    levelSelect.appendTo("#" + pid() + " >  th");
+
+    return {
+        add: function(key, description, level, atkey) {
+            rows[key] = ValueUI(id, key, description, level);
+            rows[key].html().insertAfter("#" + (atkey ? id + "-" + idfy(atkey) : id));
+        },
+        get: function(key) {
+            return rows[key];
+        },
+        filter: function(level) {
+        },
+        online: function() {
+        },
+        offline: function() {
+        },
+        html: function() {
+            return html;
+        }
+    }
+}
+
+var Process = function(host, port, url)
+{
     var hostport = host + ":" + port;
     var failed = 0;
     var data = {};
+
+    var ui = ProcessUI(host, port);
     
-    $("#data").append("<tr id='" + pid() + "'><th colspan='4'>" + hostport + "</th></tr>");
-
-    function transformVersion(version, statusvalue) {
-        var v = {};
-        switch (version) {
-        case 1:
-            v = statusvalue;
-            break;
-        case undefined:
-            v.key = statusvalue[0];
-            v.value = statusvalue[1];
-            v.desc = statusvalue[2];
-            v.lvl = 1;
-        }
-        return v;
-    }
-
     function pid() {
         return idfy(hostport);
     }
@@ -101,19 +139,16 @@ var Process = function(host, port, url) {
         }
 
         setGoodState();
-        var lastid = pid();
-        $.each(json.data, function(i, statusvalue) {
-            var v = transformVersion(json.version, statusvalue);
-            var id = pid() + "-" + idfy(v.key);
-            var row = $("#" + id);
-            if (row.length == 0) {
-                row = $("<tr id='" + id + "' class='lvl" + v.lvl + "  " + pid() + "'><td>" + v.key + "</td>" +
-                        "<td class=value></td><td></td><td class=desc>" + v.desc + "</td></tr>");
-                row.insertAfter("#" + lastid);
-                row.data(Value(id));
+        var lastkey;
+        $.each(json.data, function(i, value) {
+            v = data[value.key];
+            if (!v) {
+                v = Value();
+                data[value.key] = v;
+                ui.add(value.key, value.description, value.lvl, lastkey);
             }
-            row.data().update(v.value, json.timestamp);
-            lastid = id;
+            ui.get(value.key).value(value.value);
+            lastkey = value.key;
         });
     }
 
