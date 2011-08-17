@@ -95,10 +95,19 @@ var ProcessUI = function(host, port)
             return rows[key];
         },
         filter: function(level) {
+            var i = 0;
+            for (;i <= level; ++i) {
+                $("." + id + ".lvl" + i).css("display", "");
+            }
+            for (;i <= 8; ++i) {
+                $("." + id + ".lvl" + i).css("display", "none");
+            }
         },
         online: function() {
+            $("." + id).removeClass('failed');
         },
         offline: function() {
+            $("tr." + id).addClass('failed');
         },
         html: function() {
             return html;
@@ -114,38 +123,27 @@ var Process = function(host, port, url)
 
     var ui = ProcessUI(host, port);
     
-    function pid() {
-        return idfy(hostport);
-    }
-
-    function setGoodState() {
-        if (failed) {
-            $("." + pid()).removeClass('failed');
-            failed = 0;
-        }
-    }
-
-    function setFailedState() {
-        if (!failed) {
-            $("tr." + pid()).addClass('failed');
-            failed = 1;
-        }
-    }
-    
     function updated(json) {
         if (json == undefined) {
-            setFailedState();
+            if (!failed) {
+                ui.offline();
+                failed = true;
+            }
             return;
         }
 
-        setGoodState();
+        if (failed) {
+            ui.online();
+            failed = false;
+        }
+        
         var lastkey;
         $.each(json.data, function(i, value) {
             v = data[value.key];
             if (!v) {
                 v = Value();
                 data[value.key] = v;
-                ui.add(value.key, value.description, value.lvl, lastkey);
+                ui.add(value.key, value.desc, value.lvl, lastkey);
             }
             ui.get(value.key).value(value.value);
             lastkey = value.key;
@@ -159,25 +157,18 @@ var Process = function(host, port, url)
             dataType: "json",
             url: url,
             success: function(json) {
-                setGoodState();
                 updated(json);
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                setFailedState();
                 updated(undefined);
             },
             timeout: 500});
     }
     
     return {
-        // Get the (html) id for this process.
-        pid: function() {
-            pid();
-        },
-        
         // Apply new json data to this process. Calling with undefined
         // means that we failed to get updated data. This will trigger
-        // a failed state.
+        // an offline state.
         updated: function(json) {
             updated(json);
         },
@@ -185,6 +176,10 @@ var Process = function(host, port, url)
         // Get latest data from server and update display.
         update: function() {
             update();
+        },
+
+        filter: function(lvl) {
+            ui.filter(lvl);
         }
     }
 };
@@ -244,7 +239,15 @@ var Status = function() {
                     process.update();
                 });
             });
+        },
+        filter: function(level) {
+            $.each(hosts, function(host, ports) {
+                $.each(ports, function(port, process) {
+                    process.filter(level);
+                });
+            });
         }
+        
     }
 };
 
