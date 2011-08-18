@@ -1,7 +1,7 @@
 
 // Takes a name and turns it into something usable as a html id.
 function idfy(key) {
-    return key.replace(/[:/]/g, '-');
+    return key.replace(/[:./]/g, '-');
 }
 
 var Value = function()
