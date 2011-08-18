@@ -4,13 +4,6 @@ function idfy(key) {
     return key.replace(/[:./]/g, '-');
 }
 
-var Value = function()
-{
-    return {
-        filler: "filler"
-    };
-}
-
 var TestProcess = function(host, port, url, level) {
     
     var json = {
@@ -58,15 +51,35 @@ var ValueUI = function(processId, key, description, level)
     return {
         value: function(value) {
             $("#" + id + " > .value").text(value);
-            //console.info("set value " + value);
         },
         computed: function(computed) {
-            $("#" + id + " > .computed").text(value);
+            $("#" + id + " > .computed").text(computed);
         },
         html: function() {
             return html;
         }
     }
+}
+
+var Value = function(key, ui)
+{
+    var tag = key.substring(1 + key.lastIndexOf(":"));
+    var lastTime = 0;
+    var lastValue = 0;
+    
+    return {
+        // Update with new value and timestamp.
+        update: function(valueString, time) {
+            ui.value(valueString);
+            if (tag == "count") {
+                var value = parseInt(valueString)
+                var rate = Math.round((value - lastValue) * 1000 / (time - lastTime));
+                ui.computed(rate + "/s")
+                lastValue = value;
+                lastTime = time;
+            }
+        }
+    };
 }
 
 var ProcessUI = function(host, port, level)
@@ -146,11 +159,11 @@ var Process = function(host, port, url, level)
         $.each(json.data, function(i, value) {
             v = data[value.key];
             if (!v) {
-                v = Value();
-                data[value.key] = v;
                 ui.add(value.key, value.desc, value.lvl, lastkey);
+                v = Value(value.key, ui.get(value.key));
+                data[value.key] = v;
             }
-            ui.get(value.key).value(value.value);
+            v.update(value.value, json.timestamp);
             lastkey = value.key;
         });
     }
@@ -255,7 +268,6 @@ var Status = function(level) {
                 });
             });
         }
-        
     }
 };
 
