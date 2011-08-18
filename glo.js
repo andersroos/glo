@@ -11,7 +11,7 @@ var Value = function()
     };
 }
 
-var TestProcess = function(host, port, url) {
+var TestProcess = function(host, port, url, level) {
     
     var json = {
         version: 1,
@@ -26,7 +26,7 @@ var TestProcess = function(host, port, url) {
     
     var failed = false;
     
-    var process = Process(host, port, url);
+    var process = Process(host, port, url, level);
     
     var button = $("<button>good</button>")
     button.click(function() {
@@ -69,9 +69,11 @@ var ValueUI = function(processId, key, description, level)
     }
 }
 
-var ProcessUI = function(host, port)
+var ProcessUI = function(host, port, level)
 {
     var id = idfy(host + "-" + port);
+
+    var lvl = level;
     
     var rows = {};
 
@@ -89,17 +91,20 @@ var ProcessUI = function(host, port)
     return {
         add: function(key, description, level, atkey) {
             rows[key] = ValueUI(id, key, description, level);
-            rows[key].html().insertAfter("#" + (atkey ? id + "-" + idfy(atkey) : id));
+            var html = rows[key].html();
+            if (level > lvl) html.css("display", "none");
+            html.insertAfter("#" + (atkey ? id + "-" + idfy(atkey) : id));
         },
         get: function(key) {
             return rows[key];
         },
         filter: function(level) {
+            lvl = level;
             var i = 0;
-            for (;i <= level; ++i) {
+            for (;i <= lvl; ++i) {
                 $("." + id + ".lvl" + i).css("display", "");
             }
-            for (;i <= 8; ++i) {
+            for (;i <= 10; ++i) {
                 $("." + id + ".lvl" + i).css("display", "none");
             }
         },
@@ -115,13 +120,13 @@ var ProcessUI = function(host, port)
     }
 }
 
-var Process = function(host, port, url)
+var Process = function(host, port, url, level)
 {
     var hostport = host + ":" + port;
     var failed = 0;
     var data = {};
 
-    var ui = ProcessUI(host, port);
+    var ui = ProcessUI(host, port, level);
     
     function updated(json) {
         if (json == undefined) {
@@ -184,16 +189,18 @@ var Process = function(host, port, url)
     }
 };
 
-var Status = function() {
+var Status = function(level) {
 
     // hosts => port => process
     var hosts = {};
+
+    var lvl = level;
     
     // Discover processes at host and add dynamically whenever found.
     function discover(host, port) {
         if (host == 'test') {
             hosts[host] = hosts[host] || {};
-            hosts[host][port] = hosts[host][port] || TestProcess(host, port, url);
+            hosts[host][port] = hosts[host][port] || TestProcess(host, port, url, lvl);
             hosts[host][port].update();
             return;
         }
@@ -206,7 +213,7 @@ var Status = function() {
             url: url,
             success: function(json) {
                 hosts[host] = hosts[host] || {};
-                hosts[host][port] = hosts[host][port] || Process(host, port, url);
+                hosts[host][port] = hosts[host][port] || Process(host, port, url, lvl);
                 hosts[host][port].update();
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -241,9 +248,10 @@ var Status = function() {
             });
         },
         filter: function(level) {
+            lvl = level;
             $.each(hosts, function(host, ports) {
                 $.each(ports, function(port, process) {
-                    process.filter(level);
+                    process.filter(lvl);
                 });
             });
         }
@@ -251,7 +259,7 @@ var Status = function() {
     }
 };
 
-var s = Status();
+var s = Status(1);
 
 $(function() {
     s.rediscover();

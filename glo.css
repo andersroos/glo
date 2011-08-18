@@ -1,9 +1,11 @@
 body {
     color: black;
+    background: #d8d8d8;
 }
 
 th {
     text-align: left;
+    background: #bbb
 }
 
 .value {
@@ -14,11 +16,7 @@ th {
     color: darkred;
 }
 
-tr:nth-child(even) {
-    background: #CCC
-}
-
-tr:nth-child(odd) {
-    background: #FFF
+tr {
+    background: #fff;
 }
 
