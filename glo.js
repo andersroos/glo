@@ -13,6 +13,10 @@ var TestProcess = function(host, port, url, level) {
             {key: "/localhost/gloserver/request:count",
              value: "0",
              desc: "The number of requests to the process server.",
+             lvl: 0},
+            {key: "/localhost/gloserver/cache/size:current",
+             value: "100",
+             desc: "The size of the cache.",
              lvl: 0}
         ]
     };
@@ -27,7 +31,7 @@ var TestProcess = function(host, port, url, level) {
         if (failed) button.text("failed")
         else button.text("good");
     });
-    button.appendTo("#test-processes");
+    button.appendTo("body");
     
     process.update = function() {
         if (failed) {
@@ -35,7 +39,7 @@ var TestProcess = function(host, port, url, level) {
             return;
         }
         json.timestamp = new Date().getTime();
-        json.data[0].value = (1 + parseInt(json.data[0].value)) + '';
+        json.data[0].value = (3 + parseInt(json.data[0].value)) + '';
         process.updated(json);
     }
     return process;
@@ -277,5 +281,10 @@ $(function() {
     s.rediscover();
     setInterval(s.update, 1000);
     //setTimeout("s.update()", 1000);
-    //setTimeout("s.update()", 2000);
+   $('#lvl0').click(function() { s.filter(0); return false; });
+   $('#lvl1').click(function() { s.filter(1); return false; });
+   $('#lvl2').click(function() { s.filter(2); return false; });
+   $('#lvl3').click(function() { s.filter(3); return false; });
+   $('#lvl4').click(function() { s.filter(4); return false; });
+   $('#lvl5').click(function() { s.filter(5); return false; });
 });

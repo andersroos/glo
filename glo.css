@@ -3,6 +3,16 @@ body {
     background: #d8d8d8;
 }
 
+a {
+    color: #202020;
+    text-decoration: none;
+}
+
+a.button {
+    margin: 6px;
+    border: 1px solid black;
+    padding: 0px 20px;
+}
 
 td {
     padding: 0px 6px;
