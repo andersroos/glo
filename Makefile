@@ -3,5 +3,5 @@
 
 doc: README.html
 
-README.html:
-	markdown README.md > $@
+README.html: README.md
+	markdown $< > $@
