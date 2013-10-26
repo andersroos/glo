@@ -4,10 +4,10 @@ Copyright (c) Anders Roos. Licensed under the [MIT License].
 
 ## About ##
 
-A simple protocol, javascript client and server libraries for live
-monitoring of server status. It is extremly valueble to be able to get
-specific measurements or data points from a system, either for
-debugging or for just understanding the system better.
+A simple status data format, javascript client and server libraries
+for live monitoring of server status. It is extremly valueble to be
+able to get specific measurements or data points from a system, either
+for debugging or for just understanding the system better.
 
 This is inspired by JMX and MBeans, but read only and much simpler to
 use. The basic idea is to only specify a JSON message format and leave
