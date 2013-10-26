@@ -99,7 +99,7 @@ Currently available tags are:
       ]
     }
 
-### Previous Versions ###    
+### Previous Versions ###
 
 List of old versions.
 
