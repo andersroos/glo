@@ -4,11 +4,14 @@ Copyright (c) Anders Roos. Licensed under the [MIT License].
 
 ## About ##
 
-A javascript program for monitoring status values by getting data as
-JSON/javascript callback periodically.
+A simple protocol, javascript client and server libraries for live
+monitoring of server status. It is extremly valueble to be able to get
+specific measurements or data points from a system, either for
+debugging or for just understanding the system better.
 
-The status data is received from port 22200 to 22216 by default. Those
-are unassigned according to [IANA port assignments].
+This is inspired by JMX and MBeans, but read only and much simpler to
+use. The basic idea is to only specify a JSON message format and leave
+the rest to each implementation.
 
 ## Status Data Format ##
 
@@ -76,4 +79,3 @@ The source can be found at [GitHub].
 
 [MIT License]: http://github.com/andersroos/LICENSE.txt
 [GitHub]: http://github.com/andersroos/glo
-[IANA port assignments]: http://www.iana.org/assignments/port-numbers
