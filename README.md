@@ -20,18 +20,25 @@ wrapped in a Javascript callback.
 
 ### Message Format ###
 
-Current version is 1.
+The current version is 1.
 
     {
-        "version": <number, the current version>,
-        "timestamp": <number, server time since EPOC in milliseconds>,
-        "data": [ { "key": "<string, name + : + tag>",
-                    "value": "<string, the value as a string>",
-                    "desc": "<string, a human readable description>",
-                    "lvl": "<number, level of importance where 0 is the highest> },
-                  ... ]
+      "version": <number, the current version>,
+      "timestamp": <number, server time since EPOC in milliseconds>,
+      "data": [
+        {
+          "key": "<string, name + : + tag>",
+          "value": "<string, the value as a string>",
+          "desc": "<string, a human readable description>",
+          "lvl": "<number, level of importance where 0 is the highest>
+        },
+        ...
+      ]
     }
 
+To make clients complatible with future versions they should silently
+ignore unrecognized keys in the top dict and in the data dicts.
+    
 ### Tags ####
 
 Currently available tags are:
@@ -43,36 +50,72 @@ Currently available tags are:
   <tr><th align=left>total-duration-us</th><td>The total duration in microseconds, a value that will increase over time. For example the total duration of pricessing all requests.</td></tr>
   <tr><th align=left>max-us</th><td>The maximum time of something in microseconds. For example the maximum time to process a request.</td></tr>
 </table>
-    
+
+### Changes From Version 0 ###
+
+* The version number was added. This was added to make the code be able to distinguish between versions.
+
+* The data changed from a list of lists to a list of dicts containing
+  the keys "key", "value", "desc", "lvl". This was done to make it
+  easier to extend the data entries without breaking existing
+  implementations. Clients should ignore keys they don't recognize.
+
 ### Message Example ###
 
     {
-        "version": 1,
-        "timestamp": 1313152128209,
-        "data": [
-            { "key": "/server/request:count",
-              "value": "45023",
-              "desc": "Number of successful requests to server.",
-              "lvl": 1 },
-            { "key": "/server/cache/size:current",
-              "value": "134",
-              "desc": "The current cache size.",
-              "lvl": 2 },
-            { "key": "/server/cache/miss:count",
-              "value": "23",
-              "desc": "Number of cache misses.",
-              "lvl": 3 },
-            { "key": "/server/cache/hit:count",
-              "value": "224233",
-              "desc": "Number of cache hits.",
-              "lvl": 3 },
-            { "key": "/server/request:last-duration-us",
-              "value": "12323090239",
-              "desc": "The duration of the last request in microseconds.",
-              "lvl": 2 }
-        ]
+      "version": 1,
+      "timestamp": 1313152128209,
+      "data": [
+        {
+          "key": "/server/request:count",
+          "value": "45023",
+          "desc": "Number of successful requests to server.",
+          "lvl": 1
+        },
+        {
+          "key": "/server/cache/size:current",
+          "value": "134",
+          "desc": "The current cache size.",
+          "lvl": 2
+        },
+        {
+          "key": "/server/cache/miss:count",
+          "value": "23",
+          "desc": "Number of cache misses.",
+          "lvl": 3
+        },
+        {
+          "key": "/server/cache/hit:count",
+          "value": "224233",
+          "desc": "Number of cache hits.",
+          "lvl": 3
+        },
+        {
+          "key": "/server/request:last-duration-us",
+          "value": "12323090239",
+          "desc": "The duration of the last request in microseconds.",
+          "lvl": 2
+        }
+      ]
     }
-        
+
+### Previous Versions ###    
+
+List of old versions.
+
+#### Version 0 ####
+
+Version 0 was never publicly released.
+
+    {
+      timestamp: <timestamp ms>,
+      data: [
+        ["<key>", "<value>", "<description>"],
+        ...
+      ]
+    }
+
+
 ## Source ##
 
 The source can be found at [GitHub].
