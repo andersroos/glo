@@ -33,7 +33,8 @@ class status_server
 public:
    status_server(status_registry& registry, const std::string& server_path_prefix);
 
-   // Set the port, if not set the first available port from 22200 will be used.
+   // Set the port, if not set the first available port from 22200 will be used. Port 22200-22272
+   // are unassigned according to http://www.iana.org/assignments/port-numbers.
    void port(in_port_t port);
 
    // Get the actual port used if not manually set (available after start).
@@ -47,14 +48,10 @@ public:
    //
    // \throws TODO if it fails to start listening on port or if there is a unrecovarable
    // communications error
-   //
    void start();
 
    // Same as start but more comvenient to use with boost thread.
    void operator()();
 };
-
-
-
 
 #endif
