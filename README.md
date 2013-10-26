@@ -15,6 +15,10 @@ are unassigned according to [IANA port assignments].
 The status data is communicated through JSON, either plain JSON or
 wrapped in a Javascript callback.
 
+### Message Format ###
+
+Current version is 1.
+
     {
         "version": <number, the current version>,
         "timestamp": <number, server time since EPOC in milliseconds>,
@@ -37,7 +41,7 @@ Currently available tags are:
   <tr><th align=left>max-us</th><td>The maximum time of something in microseconds. For example the maximum time to process a request.</td></tr>
 </table>
     
-Example:
+### Message Example ###
 
     {
         "version": 1,
@@ -47,6 +51,18 @@ Example:
               "value": "45023",
               "desc": "Number of successful requests to server.",
               "lvl": 1 },
+            { "key": "/server/cache/size:current",
+              "value": "134",
+              "desc": "The current cache size.",
+              "lvl": 2 },
+            { "key": "/server/cache/miss:count",
+              "value": "23",
+              "desc": "Number of cache misses.",
+              "lvl": 3 },
+            { "key": "/server/cache/hit:count",
+              "value": "224233",
+              "desc": "Number of cache hits.",
+              "lvl": 3 },
             { "key": "/server/request:last-duration-us",
               "value": "12323090239",
               "desc": "The duration of the last request in microseconds.",
