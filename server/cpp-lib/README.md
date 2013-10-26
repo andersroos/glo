@@ -1,7 +1,7 @@
-# Glo c++ Server Lib #
+# Glo C++ Server Lib #
 
 This is the server library aid with status values and a status server
-in c++.
+in C++.
 
 Dependencies:
 
