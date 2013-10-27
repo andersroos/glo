@@ -44,8 +44,16 @@ private:
 
 int main()
 {
-   cache_stats stats;
-   status_registry registry;
-   registry.reg("/cache", &stats);
-   status_server satus_server(registry, "/example-usage-process");
+   try {
+      // Set up my cache stats, registry and status server.
+      cache_stats cache_stats;
+      status_registry status_registry;
+      status_registry.reg("/cache", &cache_stats);
+      status_server status_server(status_registry, "/example-usage-process");
+      status_server.port(22200);
+      status_server.start();
+   }
+   catch (std::exception& e) {
+      std::cerr << e.what() << std::endl;
+   }
 }
