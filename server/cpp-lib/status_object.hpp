@@ -23,7 +23,7 @@
 // status_object: API for a class holding multiple status values that belongs together, can be put
 //                into a status registry.
 //
-// status_object_base; Base class for implementing status objects.
+// status_object_base: Base class for implementing status objects.
 //
 
 //
