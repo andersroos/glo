@@ -39,6 +39,7 @@ public:
 
    // Set the port, if not set the first available port from 22200 will be used. Port 22200-22272
    // are unassigned according to http://www.iana.org/assignments/port-numbers.
+   // TODO Autmatic port assigment not implemented.
    void port(uint16_t port)
    {
       _port = port;
