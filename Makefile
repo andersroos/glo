@@ -1,15 +1,9 @@
 
-.PHONY: all doc build
+.PHONY: default build
 
-all: build
+default: build
 
-doc: README.html
-
-README.html: README.md
-	markdown $< > $@
-
-build: doc
+build:
 
 clean:
-	rm -f README.html
 	find . -name "*.gch" | xargs rm -f
