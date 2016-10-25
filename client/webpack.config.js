@@ -1,5 +1,5 @@
-var webpack = require('webpack');
-var path = require('path');
+var webpack = require("webpack");
+var path = require("path");
 
 
 module.exports = {
@@ -15,20 +15,15 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                loader: 'babel-loader',
+                loader: "babel",
                 query: {
-                    presets: ['es2016', 'es2015'],
-                    plugins: ['transform-react-jsx'],
+                    presets: ["es2016", "es2015"],
+                    plugins: ["transform-react-jsx"],
                 }
             },
             {
-                test: /\.jsx$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-                query: {
-                    presets: ['es2016', 'es2015'],
-                    plugins: ['transform-react-jsx'],
-                }
+                test: /\.scss$/,
+                loaders: ["style", "css", "sass"],
             },
         ]
     },

@@ -1,0 +1,42 @@
+body {
+    color: black;
+    background: #d8d8d8;
+}
+
+a {
+    color: #202020;
+    text-decoration: none;
+}
+
+a.button {
+    margin: 6px;
+    border: 1px solid black;
+    padding: 0 20px;
+}
+
+td {
+    padding: 0 6px;
+    border: 2px;
+}
+
+th {
+    padding: 0 10px;
+    text-align: left;
+    background: #bbb
+}
+
+.value {
+    text-align: right;
+}
+
+.computed {
+    text-align: right;
+}
+
+.failed {
+    color: darkred;
+}
+
+tr {
+    background: #fff;
+}
