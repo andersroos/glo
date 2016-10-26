@@ -35,6 +35,7 @@
         ],
         "wrap-iife": "error",
         "no-proto": "error",
+        "no-console": "off",
         "no-throw-literal": "error",
         "no-implicit-globals": "error",
         "no-global-assign": "error",

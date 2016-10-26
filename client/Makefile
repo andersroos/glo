@@ -1,5 +1,7 @@
-MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-BASE_DIR := $(realpath $(CURDIR)/$(MAKEFILE_DIR))
+# Does not work if multiple makefiles, but is not dangerous if space in filename.
+BASE_DIR := $(dir $(MAKEFILE_LIST))
+
+NPM_BIN := node_modules/.bin
 
 
 .PHONY: default build
@@ -10,11 +12,11 @@ dependencies:
 	npm install
 
 build:
-	$(BASE_DIR)/node_modules/.bin/webpack
+	$(NPM_BIN)/webpack
 	cat $(BASE_DIR)/head.html $(BASE_DIR)/build/glo.js $(BASE_DIR)/foot.html > $(BASE_DIR)/build/glo.html
 
 watch: 
-	$(BASE_DIR)/node_modules/.bin/webpack --watch
+	$(NPM_BIN)/webpack --watch
 
 clean:
 	rm -rf $(BASE_DIR)/build
