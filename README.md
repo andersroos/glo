@@ -20,17 +20,17 @@ wrapped in a Javascript callback.
 
 ### Message Format ###
 
-The current version is 1.
+The current version is 2
 
     {
       "version": <number, the current version>,
       "timestamp": <number, server time since EPOC in milliseconds>,
       "data": [
         {
-          "key": "<string, name + : + tag>",
-          "value": "<string, the value as a string>",
-          "desc": "<string, a human readable description>",
-          "lvl": "<number, level of importance where 0 is the highest>
+          "key": <string, path + ':' + tag, path is an hierarchical name separated by /, tags are described below >,
+          "value": <number or string, the type of value will>,
+          "desc": <string, a human readable description>,
+          "lvl": <number, level of importance where 0 is the highest>
         },
         ...
       ]
@@ -43,13 +43,21 @@ ignore unrecognized keys in the top dict and in the data dicts.
 
 Currently available tags are:
 <table>
-  <tr><th align=left>count</th><td>A counter that increases over time. For example a request counter.</td></tr>
-  <tr><th align=left>current</th><td>A current value. For example the numer of objects in a cache.</td></tr>
-  <tr><th align=left>last</th><td>The last value of something. For example the size of the last request.</td></tr>
-  <tr><th align=left>last-duration-us</th><td>The last duration in microseconds. For example the last duration of processing a request.</td></tr>
-  <tr><th align=left>total-duration-us</th><td>The total duration in microseconds, a value that will increase over time. For example the total duration of pricessing all requests.</td></tr>
-  <tr><th align=left>max-us</th><td>The maximum time of something in microseconds. For example the maximum time to process a request.</td></tr>
+  <tr><th align=left>count</th><td>A counter that increases over time. For example a request counter. Positive integer.</td></tr>
+  <tr><th align=left>current</th><td>A current value. For example the numer of objects in a cache. Any number.</td></tr>
+  <tr><th align=left>last</th><td>The last value of something. For example the size of the last request or a status string. Any string or number.</td></tr>
+  <tr><th align=left>last-duration-us</th><td>The last duration in microseconds. For example the last duration of processing a request. Positive number.</td></tr>
+  <tr><th align=left>total-duration-us</th><td>The total duration in microseconds, a value that will increase over time. For example the total duration of pricessing all requests. Positive number.</td></tr>
+  <tr><th align=left>max-us</th><td>The maximum time of something in microseconds. For example the maximum time to process a request. Positive number.</td></tr>
 </table>
+
+### Changes From Version 1 ###
+
+* Key is now hierarchical.
+
+* Number values allowed.
+
+* Added info by tag how value will be interpreted.
 
 ### Changes From Version 0 ###
 
@@ -63,7 +71,7 @@ Currently available tags are:
 ### Message Example ###
 
     {
-      "version": 1,
+      "version": 2,
       "timestamp": 1313152128209,
       "data": [
         {
@@ -102,6 +110,22 @@ Currently available tags are:
 ### Previous Versions ###
 
 List of old versions.
+
+#### Version 1 ####
+
+    {
+      "version": <number, the current version>,
+      "timestamp": <number, server time since EPOC in milliseconds>,
+      "data": [
+        {
+          "key": "<string, name + : + tag>",
+          "value": "<string, the value as a string>",
+          "desc": "<string, a human readable description>",
+          "lvl": "<number, level of importance where 0 is the highest>
+        },
+        ...
+      ]
+    }
 
 #### Version 0 ####
 

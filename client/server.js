@@ -7,7 +7,7 @@ export let State = {
     GOOD: 'good',
 };
 
-  
+
 // Represents a server with hostport that may or may not be connected.
 export class ServerBase {
 
@@ -18,6 +18,8 @@ export class ServerBase {
         this.port = port || 0;
         this.spec = sprintf("%s:%d", this.host, this.port);
 
+        this.values = []
+
         this.failCount = 0;
         this.state = State.INIT;
     }
@@ -25,24 +27,6 @@ export class ServerBase {
     // Update will be called periodically, on update the server is expected to try to update the data. If not //
     // connected it should try to connect, until max retries are reached. A scanning server may start its scan on
     // update. The server will decide if it should do anything or not.
-    update() {
-    }
-}
-
-export class Server extends ServerBase {
-
-    success(data) {
-        this.failCount = 0;
-        this.state = State.GOOD;
-        this.app.render();
-    }
-
-    fail() {
-        this.failCount++;
-        this.state = State.FAIL;
-        this.app.render();
-    }
-
     update() {
         // Find alternative to jsonp with jquery, maybe require CORS from servers, or find another lib.
         ajax({
@@ -54,16 +38,61 @@ export class Server extends ServerBase {
                  timeout:  200,
              });
     }
+
+    success(data) {
+        this.failCount = 0;
+        this.state = State.GOOD;
+
+
+
+        this.app.render();
+    }
+
+    fail() {
+        this.failCount++;
+        this.state = State.FAIL;
+        this.app.render();
+    }
+
+}
+
+export class Server extends ServerBase {
+
 }
 
 
+// Fake server that generates random data and sometimes disconnects.
 export class FakeServer extends ServerBase {
 
     constructor(app, port) {
         super(app, "fake", port || 22200);
     }
+
+    update() {
+        let json = {
+            version: 1,
+            timestamp: new Date().getTime(),
+            data: [
+                {
+                    key: "/localhost/gloserver/request:count",
+                    value: "0",
+                    desc: "The number of requests to the process server.",
+                    lvl: 0
+                },
+                {
+                    key: "/localhost/gloserver/cache/size:current",
+                    value: "100",
+                    desc: "The size of the cache.",
+                    lvl: 0
+                }
+            ]
+        };
+
+        setTimeout(() => { this.success(json); }, 100);
+    }
 }
 
+// Searches for servers on host from 22200 to 22220.
 export class ServerDiscover extends ServerBase {
 
     constructor(app, host) {
