@@ -19,16 +19,20 @@ class App {
         port = parseInt(port);
 
         if (host === "fake") {
-            this.servers.add(new FakeServer(port || 22200));
+            this.servers.add(new FakeServer(this, port || 22200));
         }
         else if (!port) {
-            this.servers.add(new ServerDiscover(host));
+            this.servers.add(new ServerDiscover(this, host));
         }
         else {
-            this.servers.add(new Server(host, port));
+            this.servers.add(new Server(this, host, port));
         }
 
         this.render();
+    }
+
+    update() {
+        this.servers.update();
     }
 }
 
@@ -43,12 +47,9 @@ document.addEventListener('DOMContentLoaded', function() {
     params.split("&").forEach(spec => {
         app.add(spec);
     });
-    console.info("hej", app.servers.collection);
 
     setTimeout(() => {
-        console.info("sune");
-        app.servers.collection["localhost:0"].value = 100;
-        app.render();
-    }, 3000);
+        app.update();
+    }, 1000);
 
 });

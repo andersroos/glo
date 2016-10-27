@@ -28,7 +28,7 @@ class Server extends React.Component {
         return (
             <tbody>
                 <tr>
-                    <th>Ok</th>
+                    <th>{server.state}</th>
                     <th colSpan="4">{ server.spec }</th>
                 </tr>
                 { values }

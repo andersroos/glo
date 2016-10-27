@@ -31,4 +31,7 @@ module.exports = {
         extensions: ['', '.js'],
     },
     devtool: 'source-map',
+    plugins: [
+        // new webpack.optimize.UglifyJsPlugin(),
+    ],
 };
