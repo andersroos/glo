@@ -1,5 +1,5 @@
 import 'babel-polyfill';
-import {Servers, TestServer, ServerDiscover, Server} from "./server";
+import {Servers, FakeServer, ServerDiscover, Server} from "./server";
 import {Ui} from "./ui";
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -18,8 +18,8 @@ class App {
         let [host, port] = spec.split(":", 2);
         port = parseInt(port);
 
-        if (host === "test") {
-            this.servers.add(new TestServer(port || 22200));
+        if (host === "fake") {
+            this.servers.add(new FakeServer(port || 22200));
         }
         else if (!port) {
             this.servers.add(new ServerDiscover(host));
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Parse specs from url and add as servers.
 
-    let params = document.URL.split("?", 2)[1] || "localhost";
+    let params = document.URL.split("?", 2)[1] || "fake:22200";
     params.split("&").forEach(spec => {
         app.add(spec);
     });

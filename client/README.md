@@ -17,6 +17,6 @@ servers it finds.
 
 Example: file:///tmp/glo.html?localhost
 
-To get random test data you can also use the special host "test".
+To get random fake data you can also use the special host "fake".
 
-Example: file:///tmp/glo.html?test:123&test:321
+Example: file:///tmp/glo.html?fake:123&fake:321

@@ -25,10 +25,10 @@ export class Server extends ServerBase {
 }
 
 
-export class TestServer extends ServerBase {
+export class FakeServer extends ServerBase {
 
     constructor(port) {
-        super("test", port || 22200);
+        super("fake", port || 22200);
     }
 }
 
@@ -40,7 +40,7 @@ export class ServerDiscover extends ServerBase {
 }
 
 
-// Servers structure, holds all Server/HostScanner and TestServer instances. Key is host or hostport.
+// Servers structure, holds all Server/HostScanner and FakeServer instances. Key is host or hostport.
 export class Servers {
     constructor() {
         this.collection = {}
