@@ -1,16 +1,17 @@
 import './ui.scss';
 import React from 'react';
 
-class Value extends  React.Component {
+class Item extends  React.Component {
 
     render() {
+        let {item} = this.props;
         return (
             <tr>
                 <td/>
-                <td>{this.props.value.key}</td>
-                <td className="value">{this.props.value.value}</td>
-                <td className="computed">{this.props.value.computed}</td>
-                <td>{this.props.value.desc}</td>
+                <td>{item.key}</td>
+                <td className="value">{item.value}</td>
+                <td className="computed">{item.computed}</td>
+                <td>{item.desc}</td>
             </tr>
         );
     }
@@ -22,8 +23,9 @@ class Server extends React.Component {
     render() {
         let {server} = this.props;
 
-        let values = [{key: '/localhost/gloserver/request:count', value: server.value, computed: '3/s', desc: 'Hits.'}]
-            .map((v) => <Value key={server.spec + ':' + v.spec} value={v}/> );
+        let items = Object.keys(server.items).sort().map((key) => {
+            return <Item key={key} item={server.items[key]}/>
+        });
 
         return (
             <tbody>
@@ -31,7 +33,7 @@ class Server extends React.Component {
                     <th>{server.state}</th>
                     <th colSpan="4">{ server.spec }</th>
                 </tr>
-                { values }
+                {items}
             </tbody>
         );
     }

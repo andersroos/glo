@@ -24,7 +24,7 @@ The current version is 2
 
     {
       "version": <number, the current version>,
-      "timestamp": <number, server time since EPOC in milliseconds>,
+      "timestamp": <number, server time since EPOC in microseconds>,
       "data": [
         {
           "key": <string, path + ':' + tag, path is an hierarchical name separated by /, tags are described below >,
@@ -59,6 +59,8 @@ Currently available tags are:
 
 * Added info by tag how value will be interpreted.
 
+* Changed timestamp to be in microseconds to make all times microseconds.
+
 ### Changes From Version 0 ###
 
 * The version number was added. This was added to make the code be able to distinguish between versions.
@@ -72,7 +74,7 @@ Currently available tags are:
 
     {
       "version": 2,
-      "timestamp": 1313152128209,
+      "timestamp": 1313152128209000,
       "data": [
         {
           "key": "/server/request:count",

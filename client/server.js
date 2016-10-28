@@ -1,11 +1,56 @@
 import sprintf from 'sprintf';
 import {ajax} from "jquery";
 
+ 
 export let State = {
     INIT: 'init',
     FAIL: 'fail',
     GOOD: 'good',
 };
+
+
+function convertValue(tag, value) {
+    switch (tag) {
+        case 'count':
+        case 'last-duration-us':
+        case 'total-duration-us':
+        case 'max-us':
+            return parseInt(value);
+        case 'current':
+            return parseFloat(value);
+        case 'last':
+            return value;
+    }
+    return null;
+}
+
+
+export class Item {
+    
+    constructor(timestamp, item) {
+        let [path, tag] = item.key.split(":", 2);
+        this.key = item.key
+        this.path = path.split("/");
+        this.tag = tag;
+        this.value = convertValue(tag, item.value);
+        this.desc = item.desc;
+        this.lvl = item.lvl;
+        this.timestamp = timestamp;
+        this.computed = null;
+    }
+
+    update(timestamp, value) {
+        value = convertValue(this.tag, value);
+        
+        switch (this.tag) {
+            case 'count':
+                this.computed = sprintf("%f/s", Math.round((value - this.value) * 1e6 / (timestamp - this.timestamp)));
+                break;
+        }
+        this.value = value;
+        this.timestamp = timestamp;
+    }
+}
 
 
 // Represents a server with hostport that may or may not be connected.
@@ -18,7 +63,7 @@ export class ServerBase {
         this.port = port || 0;
         this.spec = sprintf("%s:%d", this.host, this.port);
 
-        this.values = []
+        this.items = {};
 
         this.failCount = 0;
         this.state = State.INIT;
@@ -39,12 +84,24 @@ export class ServerBase {
              });
     }
 
-    success(data) {
+    success(res) {
         this.failCount = 0;
         this.state = State.GOOD;
-
-
-
+        
+        if (res.version !== 2) {
+            throw new Error(sprintf("%s exepcted version 2, was %s", this.spec, res.version))
+        }
+        
+        res.data.forEach((item) => {
+            let existing = this.items[item.key];
+            if (existing) {
+                existing.update(res.timestamp, item.value);
+            }
+            else {
+                this.items[item.key] = new Item(res.timestamp, item);
+            }
+        });
+        
         this.app.render();
     }
 
@@ -66,29 +123,31 @@ export class FakeServer extends ServerBase {
 
     constructor(app, port) {
         super(app, "fake", port || 22200);
-    }
-
-    update() {
-        let json = {
-            version: 1,
-            timestamp: new Date().getTime(),
+        
+        this.res = {
+            version: 2,
             data: [
                 {
                     key: "/localhost/gloserver/request:count",
-                    value: "0",
-                    desc: "The number of requests to the process server.",
+                    value: 0,
+                    desc: "Number of requests to the server.",
                     lvl: 0
                 },
                 {
                     key: "/localhost/gloserver/cache/size:current",
-                    value: "100",
-                    desc: "The size of the cache.",
+                    value: 100,
+                    desc: "Size of the cache.",
                     lvl: 0
                 }
             ]
         };
-
-        setTimeout(() => { this.success(json); }, 100);
+    }
+    
+    update() {
+        this.res.timestamp = new Date().getTime() * 1000;
+        this.res.data[0].value += Math.round(2 + Math.random() * 4);
+        this.res.data[1].value = Math.round(100 + Math.random() * 20);
+        setTimeout(() => { this.success(this.res); }, 100);
     }
 }
 

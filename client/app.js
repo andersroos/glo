@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         app.add(spec);
     });
 
-    setTimeout(() => {
+    setInterval(() => {
         app.update();
     }, 1000);
 
