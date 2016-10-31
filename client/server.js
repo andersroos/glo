@@ -110,7 +110,6 @@ export class ServerBase {
         this.state = State.FAIL;
         this.app.render();
     }
-
 }
 
 export class Server extends ServerBase {

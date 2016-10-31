@@ -5,3 +5,5 @@ examples/usage-in-cpp-process/main
 .idea
 node_modules
 client/build
+server/python-lib/dist/
+server/python-lib/glo.egg-info/
