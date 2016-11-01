@@ -1,6 +1,4 @@
 *.gch
 *.o
-README.html
-examples/usage-in-cpp-process/main
 .idea
-node_modules
+

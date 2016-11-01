@@ -1,9 +1,11 @@
-# Glo C++ Server Lib #
+# Glo C++ Lib for Serving Process Status #
 
-This is the server library aid with status values and a status server
-in C++.
+## About ##
 
-Dependencies:
+Library for using Glo monitoring in C++. For more information on
+Glo see [here](https://github.com/andersroos/glo).
+
+## Dependencies ##
 
 * Boost Thread
 * Boost Smart Ptr
