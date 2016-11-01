@@ -4,11 +4,11 @@ BASE_DIR := $(dir $(MAKEFILE_LIST))
 NPM_BIN := node_modules/.bin
 
 
-.PHONY: default build
+.PHONY: default build init watch clean
 
 default: build
 
-dependencies:
+init:
 	npm install
 
 build:
@@ -20,4 +20,3 @@ watch:
 
 clean:
 	rm -rf $(BASE_DIR)/build
-

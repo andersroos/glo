@@ -8,6 +8,8 @@
 
 #include "status_object.hpp"
 
+// TODO Rename things according to the other libs.
+
 //
 // The status_registry is a place to register status_objets so that others (the staus server) can
 // read them. Registration is done with a path (/-separated). In the status message from the server

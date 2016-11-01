@@ -4,14 +4,13 @@ from os import path
 
 setup_dir = path.abspath(path.dirname(__file__))
 
-# Get the long description from the README file
-with open(path.join(setup_dir, 'README.md'), encoding='utf-8') as f:
+with open(path.join(setup_dir, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name='glo',
-    version='0.0.0-dev0',
-    description='Lib for using Glo monitoring in Python.',
+    version='0.0.0.dev1',
+    description='Library for using Glo monitoring in Python.',
     long_description=long_description,
     url='https://github.com/andersroos/glo',
     author='Anders Roos',

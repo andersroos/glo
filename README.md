@@ -27,10 +27,11 @@ The current version is 2
       "timestamp": <number, server time since EPOC in microseconds>,
       "data": [
         {
-          "key": <string, path + ':' + tag, path is an hierarchical name separated by /, tags are described below >,
+          "key": <string, path + ':' + tag, path is an hierarchical name separated by /, tags are described below >, TODO Change back to string + string?
           "value": <number or string, the type of value will>,
           "desc": <string, a human readable description>,
-          "lvl": <number, level of importance where 0 is the highest>
+          "lvl": <number, level of importance where 0 is the highest> TODO Change to level? Change to named levels?
+          TODO Change tag to type + tag?
         },
         ...
       ]

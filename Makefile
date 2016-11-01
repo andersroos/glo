@@ -1,7 +1,5 @@
 
-.PHONY: default build
-
-default: build
+.PHONY: build
 
 build:
 
