@@ -12,3 +12,10 @@ class Test(TestCase):
                               key='/a/path:count',
                               lvl=1),
                          s.item())
+
+    def test_callback_is_called_on_item_get__even_after_setting_value(self):
+        self.assertEqual(63, StatusItem(key='x', value=lambda: 63).item()['value'])
+
+        s = StatusItem(key='x', value=lambda: 10)
+        s.set(18)
+        self.assertEqual(10, s.item()['value'])
