@@ -2,8 +2,6 @@
 
 Copyright (c) Anders Roos. Licensed under the [MIT License].
 
-[![Build Status](https://travis-ci.org/andersroos/glo.svg?branch=master)](https://travis-ci.org/andersroos/glo)
-
 ## About ##
 
 A simple status data format, javascript client and server libraries
