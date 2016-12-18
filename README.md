@@ -1,56 +1,148 @@
 # Glo #
 
-Copyright (c) Anders Roos. Licensed under the [MIT License].
+Copyright (c) Anders Roos. Licensed under the [MIT License](https://github.com/andersroos/LICENSE.txt).
 
 ## About ##
 
 A simple status data format, javascript client and server libraries
-for live monitoring of server status. It is extremly valueble to be
-able to get specific measurements or data points from a system, either
-for debugging or for just understanding the system better.
+for live monitoring of server status in other repos. It is extremly
+valueble to be able to get specific measurements or data points from a
+system, either for debugging or for just understanding the system
+better.
 
-This is inspired by JMX and MBeans, but read only and much simpler to
+This is inspired by JMX and MBeans, but read only and simpler to
 use. The basic idea is to only specify a JSON message format and leave
 the rest to each implementation.
+
+## Related Repositories ##
+
+* [Javscript Client](http://github.com/andersroos/glo-client)
+
+* [C++ Server Library](http://github.com/andersroos/glo-cpplib)
+
+* [Python Server Library](http://github.com/andersroos/glo-pylib)
 
 ## Status Data Format ##
 
 The status data is communicated through JSON, either plain JSON or
-wrapped in a Javascript callback.
+wrapped in a JSONP callback.
 
 ### Message Format ###
 
-The current version is 2
+The current version is 3.
 
     {
       "version": <number, the current version>,
-      "timestamp": <number, server time since EPOC in microseconds>,
-      "data": [
+      "timestamp": <number, server time since EPOC in seconds>,
+      "items": [
         {
-          "key": <string, path + ':' + tag, path is an hierarchical name separated by /, tags are described below >, TODO Change back to string + string?
-          "value": <number or string, the type of value will>,
+          "key": <string, path + ':' + tag + ['-' + type],
+                  path is an hierarchical name separated by / all chars but : are allowed,
+                  the tag describes the value in a machine readable way described below,
+                  the type part is optional and types are described below,
+                  the full key should be unique in the message>,
+          "value": <number or string>,
+          "level": <number or string, level of importance where 0 is the highest, can
+                    also be a symbol each representing a number, see below>,
           "desc": <string, a human readable description>,
-          "lvl": <number, level of importance where 0 is the highest> TODO Change to level? Change to named levels?
-          TODO Change tag to type + tag?
         },
         ...
       ]
     }
 
 To make clients complatible with future versions they should silently
-ignore unrecognized keys in the top dict and in the data dicts.
-    
+ignore unrecognized keys.
+
 ### Tags ####
 
-Currently available tags are:
+Currently available tags are (clients should just present unknown tags
+as they are, but known tags can/will be used to present calcualted
+values, for example total and count can be combined into average):
+
 <table>
-  <tr><th align=left>count</th><td>A counter that increases over time. For example a request counter. Positive integer.</td></tr>
-  <tr><th align=left>current</th><td>A current value. For example the numer of objects in a cache. Any number.</td></tr>
-  <tr><th align=left>last</th><td>The last value of something. For example the size of the last request or a status string. Any string or number.</td></tr>
-  <tr><th align=left>last-duration-us</th><td>The last duration in microseconds. For example the last duration of processing a request. Positive number.</td></tr>
-  <tr><th align=left>total-duration-us</th><td>The total duration in microseconds, a value that will increase over time. For example the total duration of pricessing all requests. Positive number.</td></tr>
-  <tr><th align=left>max-us</th><td>The maximum time of something in microseconds. For example the maximum time to process a request. Positive number.</td></tr>
+  <tr><th>Tag</th>                <th>Description</th>                                                                               <th colspan=2>Deduced Type From JSON Types</th> </tr>
+  <tr><th></th>                   <th></th>                                                                                          <th align=left>number</th> <th align=left>string</th> </tr>
+  <tr><th align=left>count</th>   <td>A counter that increases over time. For example a request counter.</td>                        <td align=left>int</td>    <td align=left>N/A</td>    </tr>
+  <tr><th align=left>current</th> <td>A current value. For example the numer of objects in a cache.</td>                             <td align=left>int</td>    <td align=left>string</td> </tr>
+  <tr><th align=left>last</th>    <td>The last value of something. For example the size of the last request or a status string.</td> <td align=left>int</td>    <td align=left>string</td> </tr>
+  <tr><th align=left>total</th>   <td>A total sum of something. For example the total duration of all requests.</td>                 <td align=left>int</td>    <td align=left>string</td> </tr>
+  <tr><th align=left>max</th>     <td>The max value of something. For example the max number of objects in a cache.</td>             <td align=left>int</td>    <td align=left>string</td> </tr>
+  <tr><th align=left>min</th>     <td>The min value of something. For example the min number of objects in a cache.</td>             <td align=left>int</td>    <td align=left>string</td> </tr>
 </table>
+
+### Types ###
+
+Defined types, types are optional and will be deduced from tag (and
+value) if not given, see tags. Type may also be needed to make keys
+unique even if the type gets deduced correctly.
+<table>
+  <tr><th>Type</th>                 <th>Description</th>                        <th>JSON Type</th>  </tr>
+  <tr><th align=left>int</th>       <td>An integer.</td>                        <td>number</td>     </tr>
+  <tr><th align=left>float</th>     <td>A float.</td>                           <td>number</td>     </tr>
+  <tr><th align=left>duration</th>  <td>A duration in seconds.</td>             <td>number</td>     </tr>
+  <tr><th align=left>timestamp</th> <td>The number of seconds since EPOCH.</td> <td>number</td>     </tr>
+  <tr><th align=left>string</th>    <td>A string.</td>                          <td>string</td>     </tr>
+  <tr><th align=left>bool</th>      <td>A bool.</td>                            <td>true/false</td> </tr>
+</table>
+
+### Levels ###
+
+Named levels, each named level represents a number where 0 is the highest level of importance.
+<table>
+  <tr><th>Level Symbol</th>       <th>Level</th> </tr>
+  <tr><th align=left>highest</th> <td>0</td>     </tr>
+  <tr><th align=left>high</th>    <td>1</td>     </tr>
+  <tr><th align=left>medium</th>  <td>2</td>     </tr>
+  <tr><th align=left>low</th>     <td>3</td>     </tr>
+  <tr><th align=left>lowes</th>   <td>4</td>     </tr>
+</table>
+
+### Message Example ###
+
+    {
+      "version": 3,
+      "timestamp": 1313152128.209000,
+      "items": [
+        {
+          "key": "/server/request:count",
+          "value": "45023",
+          "desc": "Number of requests to server.",
+          "level": "high",
+        },
+        {
+          "key": "/server/cache/size:max",
+          "value": 134,
+          "desc": "The max cache size.",
+          "level": "medium",
+        },
+        {
+          "key": "/server/request:last-timestamp",
+          "value": "1313152128.209000",
+          "desc": "The time of the last request.",
+          "level": 3
+        },
+        {
+          "key": "/server/request:last-duration",
+          "value": "0.000012",
+          "desc": "The duration of the last request.",
+          "level": 2,
+        }
+      ]
+    }
+
+### Changes From Version 3 ###
+
+* Added named symbols usable as levels.
+
+* Changed timestamp to float and seconds from int and microseconds.
+
+* Introduced types and removed tags that was used for typing.
+
+* Changed name of data to items.
+
+### Changes From Version 2 ###
+
+* Renamed lvl to level.
 
 ### Changes From Version 1 ###
 
@@ -71,81 +163,6 @@ Currently available tags are:
   easier to extend the data entries without breaking existing
   implementations. Clients should ignore keys they don't recognize.
 
-### Message Example ###
-
-    {
-      "version": 2,
-      "timestamp": 1313152128209000,
-      "data": [
-        {
-          "key": "/server/request:count",
-          "value": "45023",
-          "desc": "Number of successful requests to server.",
-          "lvl": 1
-        },
-        {
-          "key": "/server/cache/size:current",
-          "value": "134",
-          "desc": "The current cache size.",
-          "lvl": 2
-        },
-        {
-          "key": "/server/cache/miss:count",
-          "value": "23",
-          "desc": "Number of cache misses.",
-          "lvl": 3
-        },
-        {
-          "key": "/server/cache/hit:count",
-          "value": "224233",
-          "desc": "Number of cache hits.",
-          "lvl": 3
-        },
-        {
-          "key": "/server/request:last-duration-us",
-          "value": "12323090239",
-          "desc": "The duration of the last request in microseconds.",
-          "lvl": 2
-        }
-      ]
-    }
-
-### Previous Versions ###
-
-List of old versions.
-
-#### Version 1 ####
-
-    {
-      "version": <number, the current version>,
-      "timestamp": <number, server time since EPOC in milliseconds>,
-      "data": [
-        {
-          "key": "<string, name + : + tag>",
-          "value": "<string, the value as a string>",
-          "desc": "<string, a human readable description>",
-          "lvl": "<number, level of importance where 0 is the highest>
-        },
-        ...
-      ]
-    }
-
-#### Version 0 ####
-
-Version 0 was never publicly released.
-
-    {
-      timestamp: <timestamp ms>,
-      data: [
-        ["<key>", "<value>", "<description>"],
-        ...
-      ]
-    }
-
-
 ## Source ##
 
-The source can be found at [GitHub].
-
-[MIT License]: http://github.com/andersroos/LICENSE.txt
-[GitHub]: http://github.com/andersroos/glo
+The source can be found at [GitHub](https://github.com/andersroos/glo).
