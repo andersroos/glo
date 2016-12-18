@@ -1,4 +1,4 @@
 *.gch
 *.o
 .idea
-
+*.html
