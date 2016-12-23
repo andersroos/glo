@@ -24,8 +24,19 @@ the rest to each implementation.
 
 ## Status Data Format ##
 
+The status format is used to get status items from a server to display
+or aggregate.
+
+The format can also be used to push status item updates to a remote
+registry. For example batch programs may not have their own servers
+but report status data items to a server.
+
 The status data is communicated through JSON, either plain JSON or
 wrapped in a JSONP callback.
+
+Normally the status data is serverd from a HTTP-server and responding
+with all status items on `/`. If providing the query parameter
+`callback` the response will be wrapped in a jsonp callback.
 
 ### Message Format ###
 
