@@ -4,15 +4,17 @@ Copyright (c) Anders Roos. Licensed under the [MIT License](https://github.com/a
 
 ## About ##
 
-A simple status data format, javascript client and server libraries
-for live monitoring of server status in other repos. It is extremly
-valueble to be able to get specific measurements or data points from a
-system, either for debugging or for just understanding the system
-better.
+A simple status data format for monitoring of process internals. See
+below for javascript client and server libraries.
 
-This is inspired by JMX and MBeans, but read only and simpler to
-use. The basic idea is to only specify a JSON message format and leave
-the rest to each implementation.
+To be able to get specific measurements or data points from a system
+can be very useful, either for debugging or for just understanding the
+system better. Logging, debugging or other alternative methods
+sometimes affect the system too much and can't be run in production.
+
+This is inspired by JMX and MBeans, but is read only and (hopefully)
+simpler to use. This repo only specifies JSON message formats and
+leave the rest to each implementation.
 
 ## Related Repositories ##
 
@@ -24,35 +26,34 @@ the rest to each implementation.
 
 ## Status Data Format ##
 
-The status format is used to get status items from a server to display
-or aggregate.
+The status format is used to get status items from a server to
+display, aggregate, store or whatever.
 
 The format can also be used to push status item updates to a remote
 registry. For example batch programs may not have their own servers
-but report status data items to a server.
+but report status items to a server.
 
 The status data is communicated through JSON, either plain JSON or
 wrapped in a JSONP callback.
 
 Normally the status data is serverd from a HTTP-server and responding
-with all status items on `/`. If providing the query parameter
-`callback` the response will be wrapped in a jsonp callback.
+with all status items on `/` or another path. If providing the query
+parameter `callback` the response will be wrapped in a jsonp callback.
 
 ### Message Format ###
 
-The current version is 3.
+The current version is 4.
 
     {
       "version": <number, the current version>,
       "timestamp": <number, server time since EPOC in seconds>,
       "items": [
         {
-          "key": <string, path + ':' + tag + ['-' + type],
+          "key": <string, path + ':' + tag + ['-' + tag ...],
                   path is an hierarchical name separated by / all chars but : are allowed,
-                  the tag describes the value in a machine readable way described below,
-                  the type part is optional and types are described below,
+                  the tag describes the value in a human and machine readable way described below,
                   the full key should be unique in the message>,
-          "value": <number or string>,
+          "value": <number, string or bool>,
           "level": <number or string, level of importance where 0 is the highest, can
                     also be a symbol each representing a number, see below>,
           "desc": <string, a human readable description>,
@@ -61,39 +62,34 @@ The current version is 3.
       ]
     }
 
-To make clients complatible with future versions they should silently
-ignore unrecognized keys.
-
 ### Tags ####
 
-Currently available tags are (clients should just present unknown tags
-as they are, but known tags can/will be used to present calcualted
-values, for example total and count can be combined into average):
+Tags are used to add information about a value for both the human and
+(possibly) the machine. A client can use tags to present values in a
+better way (for example formatted time). Or it can be used to combine
+values with the same key, like total and count into average.
+
+A client should always display unknown tags or unexpected tag type
+combinations as is (even if the machine can't make any sense of it).
+
+If using multiple tags they should be separated by '-'. Be warned
+using too many tags will probably make the machine confused and unable
+to present a value in any but the most basic way.
+
+A tag can be any string not containing '-' or ':'.
 
 <table>
-  <tr><th>Tag</th>                <th>Description</th>                                                                               <th colspan=2>Deduced Type From JSON Types</th> </tr>
-  <tr><th></th>                   <th></th>                                                                                          <th align=left>number</th> <th align=left>string</th> </tr>
-  <tr><th align=left>count</th>   <td>A counter that increases over time. For example a request counter.</td>                        <td align=left>int</td>    <td align=left>N/A</td>    </tr>
-  <tr><th align=left>current</th> <td>A current value. For example the numer of objects in a cache.</td>                             <td align=left>int</td>    <td align=left>string</td> </tr>
-  <tr><th align=left>last</th>    <td>The last value of something. For example the size of the last request or a status string.</td> <td align=left>int</td>    <td align=left>string</td> </tr>
-  <tr><th align=left>total</th>   <td>A total sum of something. For example the total duration of all requests.</td>                 <td align=left>int</td>    <td align=left>string</td> </tr>
-  <tr><th align=left>max</th>     <td>The max value of something. For example the max number of objects in a cache.</td>             <td align=left>int</td>    <td align=left>string</td> </tr>
-  <tr><th align=left>min</th>     <td>The min value of something. For example the min number of objects in a cache.</td>             <td align=left>int</td>    <td align=left>string</td> </tr>
-</table>
-
-### Types ###
-
-Defined types, types are optional and will be deduced from tag (and
-value) if not given, see tags. Type may also be needed to make keys
-unique even if the type gets deduced correctly.
-<table>
-  <tr><th>Type</th>                 <th>Description</th>                        <th>JSON Type</th>  </tr>
-  <tr><th align=left>int</th>       <td>An integer.</td>                        <td>number</td>     </tr>
-  <tr><th align=left>float</th>     <td>A float.</td>                           <td>number</td>     </tr>
-  <tr><th align=left>duration</th>  <td>A duration in seconds.</td>             <td>number</td>     </tr>
-  <tr><th align=left>timestamp</th> <td>The number of seconds since EPOCH.</td> <td>number</td>     </tr>
-  <tr><th align=left>string</th>    <td>A string.</td>                          <td>string</td>     </tr>
-  <tr><th align=left>bool</th>      <td>A bool.</td>                            <td>true/false</td> </tr>
+  <tr><th>Tag</th>                 <th>Description</th>                                                                               <th>Recommended JSON Type</th>                </tr>
+  <tr><th align=left>count</th>    <td>A count of something probably strictly increasing. For example a request counter.</td>         <td align=left>number (without fraction)</td> </tr>
+  <tr><th align=left>size</th>     <td>A size of something. For example number of obejcts in a cache.</td>                            <td align=left>number</td>                    </tr>
+  <tr><th align=left>last</th>     <td>The last value of something. For example the last status string returned.</td>                 <td align=left>number, string or bool</td>    </tr>
+  <tr><th align=left>total</th>    <td>A total sum of something. For example the total size of all requests.</td>                     <td align=left>number</td>                    </tr>
+  <tr><th align=left>max</th>      <td>The max value of something. For example the max number of objects in a cache.</td>             <td align=left>number</td>                    </tr>
+  <tr><th align=left>min</th>      <td>The min value of something. For example the min number of objects in a cache.</td>             <td align=left>number</td>                    </tr>
+  <tr><th align=left>average</th>  <td>The average of something. For example the average response size.</td>                          <td align=left>number</td>                    </tr>
+  <tr><th align=left>current</th>  <td>A current value. Just a value.</td>                                                            <td align=left>number, string or bool</td>    </tr>
+  <tr><th align=left>duration</th> <td>A duration in seconds. For example last request duration.</td>                                 <td align=left>number</td>                    </tr>
+  <tr><th align=left>time</th>     <td>A timestamp. The number of seconds since EPOCH.</td>                                           <td align=left>number</td>                    </tr>
 </table>
 
 ### Levels ###
@@ -105,7 +101,7 @@ Named levels, each named level represents a number where 0 is the highest level 
   <tr><th align=left>high</th>    <td>1</td>     </tr>
   <tr><th align=left>medium</th>  <td>2</td>     </tr>
   <tr><th align=left>low</th>     <td>3</td>     </tr>
-  <tr><th align=left>lowes</th>   <td>4</td>     </tr>
+  <tr><th align=left>lowest</th>  <td>4</td>     </tr>
 </table>
 
 ### Message Example ###
@@ -115,16 +111,16 @@ Named levels, each named level represents a number where 0 is the highest level 
       "timestamp": 1313152128.209000,
       "items": [
         {
-          "key": "/server/request:count",
-          "value": "45023",
-          "desc": "Number of requests to server.",
-          "level": "high",
-        },
-        {
-          "key": "/server/cache/size:max",
+          "key": "/server/cache:max-size",
           "value": 134,
           "desc": "The max cache size.",
           "level": "medium",
+        },
+        {
+          "key": "/server/request:count",
+          "value": "45023",
+          "desc": "Number of requests since server restart.",
+          "level": "high",
         },
         {
           "key": "/server/request:last-timestamp",
@@ -140,6 +136,10 @@ Named levels, each named level represents a number where 0 is the highest level 
         }
       ]
     }
+
+### Changes From Version 4 ###
+
+* Merged tag and types.
 
 ### Changes From Version 3 ###
 
