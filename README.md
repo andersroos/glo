@@ -2,9 +2,7 @@
 
 Copyright (c) Anders Roos. Licensed under the [MIT License](https://github.com/andersroos/LICENSE.txt).
 
-<aside class="warning">
-The data formats are still in development and changes frequently.
-</aside>
+**WARNING: The data formats are still in development and changes frequently.**
 
 ## About ##
 
