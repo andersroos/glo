@@ -26,7 +26,7 @@ leave the rest to each implementation.
 
 * [Python Server Library](http://github.com/andersroos/glo-pylib)
 
-## Status Data Format ##
+## Status Format ##
 
 The status format is used to get status items from a server to
 display, aggregate, store or whatever.
@@ -35,16 +35,16 @@ The format can also be used to push status item updates to a remote
 registry. For example batch programs may not have their own servers
 but report status items to a server.
 
-The status data is communicated through JSON, either plain JSON or
-wrapped in a JSONP callback.
+The data is communicated through JSON, either plain JSON or wrapped in
+a JSONP callback.
 
-Normally the status data is serverd from a HTTP-server and responding
-with all status items on `/` or another path. If providing the query
+Normally the data is serverd from a HTTP-server and responding with
+all status items on `/` or another path. If providing the query
 parameter `callback` the response will be wrapped in a jsonp callback.
 
 ### Message Format ###
 
-The current version is 4.
+The current version is 5.
 
     {
       "version": <number, the current version>,
@@ -59,6 +59,7 @@ The current version is 4.
           "level": <number or string, level of importance where 0 is the highest, can
                     also be a symbol each representing a number, see below>,
           "desc": <string, a human readable description>,
+          "timestamp": <number, optional, server time since EPOC in seconds, override the global timestamp for this item>,
         },
         ...
       ]
@@ -82,16 +83,16 @@ A tag can be any string not containing '-' or ':'.
 
 <table>
   <tr><th>Tag</th>                 <th>Description</th>                                                                               <th>Recommended JSON Type</th>                </tr>
-  <tr><th align=left>count</th>    <td>A count of something probably strictly increasing. For example a request counter.</td>         <td align=left>number (without fraction)</td> </tr>
-  <tr><th align=left>size</th>     <td>A size of something. For example number of obejcts in a cache.</td>                            <td align=left>number</td>                    </tr>
-  <tr><th align=left>last</th>     <td>The last value of something. For example the last status string returned.</td>                 <td align=left>number, string or bool</td>    </tr>
-  <tr><th align=left>total</th>    <td>A total sum of something. For example the total size of all requests.</td>                     <td align=left>number</td>                    </tr>
-  <tr><th align=left>max</th>      <td>The max value of something. For example the max number of objects in a cache.</td>             <td align=left>number</td>                    </tr>
-  <tr><th align=left>min</th>      <td>The min value of something. For example the min number of objects in a cache.</td>             <td align=left>number</td>                    </tr>
-  <tr><th align=left>average</th>  <td>The average of something. For example the average response size.</td>                          <td align=left>number</td>                    </tr>
-  <tr><th align=left>current</th>  <td>A current value. Just a value.</td>                                                            <td align=left>number, string or bool</td>    </tr>
-  <tr><th align=left>duration</th> <td>A duration in seconds. For example last request duration.</td>                                 <td align=left>number</td>                    </tr>
-  <tr><th align=left>time</th>     <td>A timestamp. The number of seconds since EPOCH.</td>                                           <td align=left>number</td>                    </tr>
+  <tr><th align=left>count</th>     <td>A count of something probably strictly increasing. For example a request counter.</td>         <td align=left>number (without fraction)</td> </tr>
+  <tr><th align=left>size</th>      <td>A size of something. For example number of obejcts in a cache.</td>                            <td align=left>number</td>                    </tr>
+  <tr><th align=left>last</th>      <td>The last value of something. For example the last status string returned.</td>                 <td align=left>number, string or bool</td>    </tr>
+  <tr><th align=left>total</th>     <td>A total sum of something. For example the total size of all requests.</td>                     <td align=left>number</td>                    </tr>
+  <tr><th align=left>max</th>       <td>The max value of something. For example the max number of objects in a cache.</td>             <td align=left>number</td>                    </tr>
+  <tr><th align=left>min</th>       <td>The min value of something. For example the min number of objects in a cache.</td>             <td align=left>number</td>                    </tr>
+  <tr><th align=left>average</th>   <td>The average of something. For example the average response size.</td>                          <td align=left>number</td>                    </tr>
+  <tr><th align=left>current</th>   <td>A current value. Just a value.</td>                                                            <td align=left>number, string or bool</td>    </tr>
+  <tr><th align=left>duration</th>  <td>A duration in seconds. For example last request duration.</td>                                 <td align=left>number</td>                    </tr>
+  <tr><th align=left>timestamp</th> <td>A timestamp. The number of seconds since EPOCH.</td>                                           <td align=left>number</td>                    </tr>
 </table>
 
 ### Levels ###
@@ -141,9 +142,15 @@ Named levels, each named level represents a number where 0 is the highest level 
 
 ### Changes From Version 4 ###
 
-* Merged tag and types.
+* Added timestamp each item that can override the global
+  timestamp. This can be used by a proxy to merge data from several
+  sources.
+
+* Renamed tag time to timetsamp.
 
 ### Changes From Version 3 ###
+
+* Merged tag and types.
 
 * Added named symbols usable as levels.
 
@@ -176,6 +183,44 @@ Named levels, each named level represents a number where 0 is the highest level 
   easier to extend the data entries without breaking existing
   implementations. Clients should ignore keys they don't recognize.
 
+## Update Format ##
+
+The update is used push updates for one or more status items to a
+server. This can be good for short lived processes or many processes
+where it is better to let the status be served by a central server.
+
+The current implementation sends status updates over UDP to a server.
+
+### Message Format ###
+
+    {
+      "items": [
+        {
+          "key": <string, see key for status data format>,
+          "value": <number, string or bool, see value for status data format>,
+          "op": <string, the operation that the value should perfor, see below, optional the default is "set">
+          "level": <number or string, optional, see status data format>,
+          "desc": <string, optional, see status data format>,
+        },
+        ...
+      ]
+    }
+
+The description fields level and desc are both optional they may
+either be configured in the server or the server will use the last
+known value.
+
+### Operations ###
+
+Named levels, each named level represents a number where 0 is the highest level of importance.
+<table>
+  <tr><th>Operation</th>       <th>Description</th> </tr>
+  <tr><th align=left>set</th> <td>The server replaces its value with the value in the message.</td>                         </tr>
+  <tr><th align=left>add</th> <td>The server adds this value to the value in the message (or to 0 if not yet present).</td> </tr>
+</table>
+
+
 ## Source ##
 
 The source can be found at [GitHub](https://github.com/andersroos/glo).
+
